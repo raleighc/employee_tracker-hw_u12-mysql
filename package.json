@@ -1,0 +1,27 @@
+{
+  "name": "employee_tracker-hw_u12-mysql",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/raleighc/employee_tracker-hw_u12-mysql.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/raleighc/employee_tracker-hw_u12-mysql/issues"
+  },
+  "homepage": "https://github.com/raleighc/employee_tracker-hw_u12-mysql#readme",
+  "dependencies": {
+    "console.table": "^0.10.0",
+    "inquirer": "^7.3.3",
+    "mysql": "^2.18.1",
+    "nodemon": "^2.0.4"
+  }
+}
