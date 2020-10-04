@@ -21,6 +21,8 @@ var connection = mysql.createConnection({
     if (err) throw err;
     console.log("connected as id " + connection.threadId + "\n");
     readDepartment();
+    readRole();
+    readEmployee();
   });
 
   function readDepartment() {
@@ -29,7 +31,29 @@ var connection = mysql.createConnection({
       if (err) throw err;
       // Log all results of the SELECT statement
       console.log(res);
-      connection.end();
     });
   }
   
+  function readRole() {
+    console.log("Selecting all roles...\n");
+    connection.query("SELECT * FROM role", function(err, res) {
+      if (err) throw err;
+      // Log all results of the SELECT statement
+      console.log(res);
+    });
+  }
+
+  function readEmployee() {
+    console.log("Selecting all employees...\n");
+    connection.query("SELECT * FROM employee", function(err, res) {
+      if (err) throw err;
+      // Log all results of the SELECT statement
+      console.log(res);
+      endConnection();
+    });
+  }
+
+  function endConnection() {
+      console.log("...your connection has been severed.");
+    connection.end();
+  }
