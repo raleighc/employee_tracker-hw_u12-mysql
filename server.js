@@ -57,8 +57,12 @@ function begin() {
         removeEmployee();
       } else if (answer.iWouldLikeTo === "View All Roles") {
         viewAllRoles();
+      } else if (answer.iWouldLikeTo === "Add Role") {
+        addRole();
       } else if (answer.iWouldLikeTo === "View All Departments") {
         viewAllDepartments();
+      } else if (answer.iWouldLikeTo === "Add Department") {
+        addDepartment();
       } else if (answer.iWouldLikeTo === "Exit") {
         endConnection();
       }
@@ -213,15 +217,86 @@ function viewAllRoles() {
   });
 }
 
+function addRole() {
+  connection.query(`SELECT name, dept_id FROM department;`, (err, results) => {
+    if (err) throw err;
+    const deptArray = [];
+    for (let i = 0; i < results.length; i++) {
+      const deptID = {
+        name: results[i].name,
+        value: results[i].dept_id,
+      };
+      deptArray.push(deptID);
+      //   console.log(roleID);
+    }
+    inquirer
+      .prompt([
+        {
+          name: "roleName",
+          type: "input",
+          message: "What role would you like to add?",
+        },
+        {
+          name: "roleSalary",
+          type: "input",
+          message: "What is this role's annual salary?",
+        },
+        {
+          name: "deptConnection",
+          type: "list",
+          message: "What department is this position in?",
+          choices: deptArray,
+        },
+      ])
+      .then((info) => {
+        // console.log(info.jobTitle);
+        connection.query(
+          `INSERT INTO role (title, salary, dept_id)
+                VALUES (?, ?, ?);`,
+          [info.roleName, info.roleSalary, info.deptConnection],
+          (err, res) => {
+            if (err) throw err;
+            console.log("You've added a new role. \n");
+            begin();
+          }
+        );
+      });
+  });
+}
+
 function viewAllDepartments() {
-    console.log("");
-    connection.query(`SELECT dept_id, name FROM department;`, (err, res) => {
-      if (err) throw err;
-      console.table(res);
-      //   console.log(empArray);
-      begin();
+  console.log("");
+  connection.query(`SELECT dept_id, name FROM department;`, (err, res) => {
+    if (err) throw err;
+    console.table(res);
+    //   console.log(empArray);
+    begin();
+  });
+}
+
+function addDepartment() {
+  inquirer
+    .prompt([
+      {
+        name: "deptName",
+        type: "input",
+        message: "What department would you like to add?",
+      },
+    ])
+    .then((info) => {
+      // console.log(info.jobTitle);
+      connection.query(
+        `INSERT INTO department (name)
+                VALUES (?);`,
+        [info.deptName],
+        (err, res) => {
+          if (err) throw err;
+          console.log("You've added a new department. \n");
+          begin();
+        }
+      );
     });
-  }
+}
 
 function endConnection() {
   console.log(
