@@ -39,7 +39,7 @@ function begin() {
         "Update Employee Manager",
         "View All Roles",
         "Add Role",
-        "Removed Role",
+        "Remove Role",
         "View All Departments",
         "Add Department",
         "Remove Department",
@@ -59,6 +59,8 @@ function begin() {
         viewAllRoles();
       } else if (answer.iWouldLikeTo === "Add Role") {
         addRole();
+      } else if (answer.iWouldLikeTo === "Remove Role") {
+        removeRole();
       } else if (answer.iWouldLikeTo === "View All Departments") {
         viewAllDepartments();
       } else if (answer.iWouldLikeTo === "Add Department") {
@@ -264,6 +266,46 @@ function addRole() {
   });
 }
 
+function removeRole() {
+    connection.query(
+        `SELECT title, role_id FROM role;`,
+      (err, results) => {
+        if (err) throw err;
+        const roleArray = [];
+        for (let i = 0; i < results.length; i++) {
+            const roleID = {
+                name: results[i].title,
+                value: results[i].role_id,
+            }
+            roleArray.push(roleID);
+        }
+        console.log(roleArray);
+        inquirer
+          .prompt([
+            {
+              name: "roleToDelete",
+              type: "list",
+              message: "Which role would you like to remove?",
+              choices: roleArray,
+            },
+          ])
+          .then((info) => {
+            console.log(info);
+            connection.query(
+              `DELETE FROM role
+              WHERE role_id = ?;`,
+              [info.roleToDelete],
+              (err, res) => {
+                if (err) throw err;
+                console.log("\nYou've removed a role. \n");
+                begin();
+              }
+            );
+          });
+      }
+    );
+  }
+
 function viewAllDepartments() {
   console.log("");
   connection.query(`SELECT dept_id, name FROM department;`, (err, res) => {
@@ -297,6 +339,46 @@ function addDepartment() {
       );
     });
 }
+
+// function removeDepartment() {
+//     connection.query(
+//         `SELECT name, dept_id FROM department;`,
+//       (err, results) => {
+//         if (err) throw err;
+//         const deptArray = [];
+//         for (let i = 0; i < results.length; i++) {
+//             const deptID = {
+//                 name: results[i].name,
+//                 value: results[i].dept_id,
+//             }
+//             roleArray.push(deptID);
+//         }
+//         console.log(roleArray);
+//         inquirer
+//           .prompt([
+//             {
+//               name: "roleToDelete",
+//               type: "list",
+//               message: "Which role would you like to remove?",
+//               choices: roleArray,
+//             },
+//           ])
+//           .then((info) => {
+//             console.log(info);
+//             connection.query(
+//               `DELETE FROM role
+//               WHERE role_id = ?;`,
+//               [info.roleToDelete],
+//               (err, res) => {
+//                 if (err) throw err;
+//                 console.log("\nYou've removed a role. \n");
+//                 begin();
+//               }
+//             );
+//           });
+//       }
+//     );
+//   }
 
 function endConnection() {
   console.log(
