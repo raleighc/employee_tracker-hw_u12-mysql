@@ -40,6 +40,8 @@ function begin() {
         "View All Roles",
         "Add Role",
         "Removed Role",
+        "Add Department",
+        "Remove Department",
         "Exit",
       ],
     })
@@ -50,6 +52,10 @@ function begin() {
         viewByDept();
       } else if (answer.iWouldLikeTo === "Add Employee") {
         addEmployee();
+      } else if (answer.iWouldLikeTo === "Remove Employee") {
+        removeEmployee();
+      } else if (answer.iWouldLikeTo === "View All Roles") {
+        viewAllRoles();
       } else if (answer.iWouldLikeTo === "Exit") {
         endConnection();
       }
@@ -59,8 +65,7 @@ function begin() {
 function viewAllEmployees() {
   console.log("");
   connection.query(
-    `SELECT employees.emp_id, employees.first_name, employees.last_name, role.title,
-      department.name, role.salary,
+    `SELECT employees.emp_id, employees.first_name, employees.last_name, role.title, department.name, role.salary,
       concat(managers.first_name , " " , managers.last_name) AS "manager"
       FROM employees LEFT JOIN employees AS managers ON employees.manager_id=managers.emp_id
       INNER JOIN role ON employees.role_id=role.role_id
@@ -80,7 +85,7 @@ function viewByDept() {
     const departmentsArray = [];
     for (let i = 0; i < result.length; i++) {
       departmentsArray.push(result[i]);
-      console.log(result[i])
+      //   console.log(result[i])
     }
     inquirer
       .prompt({
@@ -109,53 +114,122 @@ function viewByDept() {
 }
 
 function addEmployee() {
-    
-    connection.query(`SELECT title FROM role;`, (err, result) => {
-        if (err) throw err;
-        const rolesArray = [];
-        for (let i = 0; i < result.length; i++) {
-          rolesArray.push(result[i].title);
-        }
-    inquirer.prompt([
+  connection.query(`SELECT title, role_id FROM role;`, (err, results) => {
+    if (err) throw err;
+    const rolesArray = [];
+    for (let i = 0; i < results.length; i++) {
+      const roleID = {
+        name: results[i].title,
+        value: results[i].role_id,
+      };
+      rolesArray.push(roleID);
+      //   console.log(roleID);
+    }
+    inquirer
+      .prompt([
         {
-            name: "first",
-            type: "input",
-            message: "What is the employee's first name?"
+          name: "first",
+          type: "input",
+          message: "What is the employee's first name?",
         },
         {
-            name: "last",
-            type: "input",
-            message: "What is the employee's last name?"
+          name: "last",
+          type: "input",
+          message: "What is the employee's last name?",
         },
         {
-            name: "jobTitle",
-            type: "list",
-            message: "What is the employee's role?",
-            choices: rolesArray,
+          name: "jobTitle",
+          type: "list",
+          message: "What is the employee's role?",
+          choices: rolesArray,
         },
-    ]).then((info) => {
-        const associatedID = connection.query(`SELECT role-id FROM role WHERE title = ${info.jobTitle};`, (err, res) =>{
-            if (err) throw err;
-            console.log(res)
-        })
+      ])
+      .then((info) => {
+        // console.log(info.jobTitle);
         connection.query(
-            `INSERT INTO employees (first_name, last_name, role_id)
+          `INSERT INTO employees (first_name, last_name, role_id)
             VALUES (?, ?, ?);`,
-            [info.first, info.last, associatedID],
+          [info.first, info.last, info.jobTitle],
+          (err, res) => {
+            if (err) throw err;
+            console.log("You've added a new Employee. \n");
+            begin();
+          }
+        );
+      });
+  });
+}
+
+function removeEmployee() {
+  connection.query(
+    `SELECT first_name, last_name, emp_id FROM employees;`,
+    (err, results) => {
+      if (err) throw err;
+      const empArray = [];
+      for (let i = 0; i < results.length; i++) {
+        const empID = {
+          name: results[i].first_name + " " + results[i].last_name,
+          value: results[i].emp_id,
+        };
+        empArray.push(empID);
+        //   console.log(empArray);
+      }
+      inquirer
+        .prompt([
+          {
+            name: "employeeToDelete",
+            type: "list",
+            message: "Which employee would you like to remove?",
+            choices: empArray,
+          },
+        ])
+        .then((info) => {
+          // console.log(info);
+          connection.query(
+            `DELETE FROM employees
+            WHERE emp_id = ?;`,
+            [info.employeeToDelete],
             (err, res) => {
               if (err) throw err;
-              console.table(res);
-              viewAllEmployees();
+              console.log("\nYou've removed a problem employee. \n");
               begin();
             }
           );
-    })
-});
+        });
+    }
+  );
 }
 
+// function viewRoles () {
+//     console.log("");
+//     connection.query(
+//       `SELECT employees.emp_id, employees.first_name, employees.last_name, role.title,
+//         department.name, role.salary,
+//         concat(managers.first_name , " " , managers.last_name) AS "manager"
+//         FROM employees LEFT JOIN employees AS managers ON employees.manager_id=managers.emp_id
+//         INNER JOIN role ON employees.role_id=role.role_id
+//         INNER JOIN department ON role.dept_id=department.dept_id ORDER BY employees.emp_id asc;`,
+//       (err, res) => {
+//         if (err) throw err;
+//         console.table(res);
+//         begin();
+//       }
+//     );
+//   }
 
+function viewAllRoles() {
+  console.log("");
+  connection.query(`SELECT role_id, title, salary FROM role;`, (err, res) => {
+    if (err) throw err;
+    console.table(res);
+    //   console.log(empArray);
+    begin();
+  });
+}
 
 function endConnection() {
-  console.log("...your connection has been severed.");
+  console.log(
+    "\nThanks for building and maintaining your team.\n...your connection has been severed. \n"
+  );
   connection.end();
 }

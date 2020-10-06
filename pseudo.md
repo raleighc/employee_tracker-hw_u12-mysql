@@ -34,3 +34,5 @@ update employee roles.
     -view all roles
     -add role
     -remove role
+    -add department
+    -remove department
