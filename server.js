@@ -187,7 +187,7 @@ function removeEmployee() {
         empArray.push(empID);
           
       }
-      console.log(empArray);
+    //   console.log(empArray);
       inquirer
         .prompt([
           {
@@ -241,7 +241,7 @@ function updateEmployeeRole() {
         }
       });
     //   console.log(empArray);
-        console.log(roleArray);
+        // console.log(roleArray);
       inquirer.prompt([
         {
           name: "employeeToChange",
@@ -341,7 +341,7 @@ function removeRole() {
       };
       roleArray.push(roleID);
     }
-    console.log(roleArray);
+    // console.log(roleArray);
     inquirer
       .prompt([
         {
@@ -352,7 +352,7 @@ function removeRole() {
         },
       ])
       .then((info) => {
-        console.log(info);
+        // console.log(info);
         connection.query(
           `DELETE FROM role
               WHERE role_id = ?;`,
@@ -412,7 +412,7 @@ function removeDepartment() {
       };
       deptArray.push(deptID);
     }
-    console.log(deptArray);
+    // console.log(deptArray);
     inquirer
       .prompt([
         {
@@ -423,7 +423,7 @@ function removeDepartment() {
         },
       ])
       .then((info) => {
-        console.log(info);
+        // console.log(info);
         connection.query(
           `DELETE FROM department
               WHERE dept_id = ?;`,
