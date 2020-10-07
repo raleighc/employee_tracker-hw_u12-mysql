@@ -32,11 +32,11 @@ function begin() {
       choices: [
         "View All Employees",
         "View All Employees By Department",
-        "View All Employees By Manager",
+        // "View All Employees By Manager",
         "Add Employee",
         "Remove Employee",
         "Update Employee Role",
-        "Update Employee Manager",
+        // "Update Employee Manager",
         "View All Roles",
         "Add Role",
         "Remove Role",
@@ -55,6 +55,8 @@ function begin() {
         addEmployee();
       } else if (answer.iWouldLikeTo === "Remove Employee") {
         removeEmployee();
+      } else if (answer.iWouldLikeTo === "Update Employee Role") {
+        updateEmployeeRole();
       } else if (answer.iWouldLikeTo === "View All Roles") {
         viewAllRoles();
       } else if (answer.iWouldLikeTo === "Add Role") {
@@ -183,8 +185,9 @@ function removeEmployee() {
           value: results[i].emp_id,
         };
         empArray.push(empID);
-        //   console.log(empArray);
+          
       }
+      console.log(empArray);
       inquirer
         .prompt([
           {
@@ -211,22 +214,64 @@ function removeEmployee() {
   );
 }
 
-// function updateEmployeeRole() {
-//     connection.query(
-//         `SELECT first_name, last_name, emp_id FROM employees;`,
-//     (err, results) => {
-//       if (err) throw err;
-//       const empArray = [];
-//       for (let i = 0; i < results.length; i++) {
-//         const empID = {
-//           name: results[i].first_name + " " + results[i].last_name,
-//           value: results[i].emp_id,
-//         };
-//         empArray.push(empID);
-//         //   console.log(empArray);
-//       }
-//     )
-// }
+function updateEmployeeRole() {
+  connection.query(
+    `SELECT employees.emp_id, employees.first_name, employees.last_name, role.title, role.role_id FROM employees
+    LEFT JOIN role ON employees.role_id=role.role_id;`,
+    (err, results) => {
+      if (err) throw err;
+      const empArray = [];
+      const roleArray = [];
+      for (let i = 0; i < results.length; i++) {
+        // console.log(results);
+        const empID = {
+          name: results[i].first_name + " " + results[i].last_name,
+          value: results[i].emp_id,
+        };
+        empArray.push(empID);
+      }
+      connection.query(`SELECT role_id, title, salary FROM role;`, (err, results) => {
+        if (err) throw err;
+        for (let i = 0; i < results.length; i++) {
+            const roleID = {
+                name: results[i].title,
+                value: results[i].role_id,
+              };
+              roleArray.push(roleID);
+        }
+      });
+    //   console.log(empArray);
+        console.log(roleArray);
+      inquirer.prompt([
+        {
+          name: "employeeToChange",
+          type: "list",
+          message: "Which employee's role would you like to change?",
+          choices: empArray,
+        },
+        {
+            name: "employeeRoleEdit",
+            type: "list",
+            message: "Which role should this employee have?",
+            choices: roleArray,
+          },
+      ]).then((info) => {
+        //   console.log(info);
+          connection.query(
+            `UPDATE employees
+            SET role_id = ?
+            WHERE emp_id = ?;`,
+            [info.employeeRoleEdit, info.employeeToChange],
+            (err, res) => {
+              if (err) throw err;
+              console.log("\nYou've changed the employee's role. \n");
+              begin();
+            }
+          );
+        });
+    }
+  );
+}
 
 function viewAllRoles() {
   console.log("");
